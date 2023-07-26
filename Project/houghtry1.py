@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import math
+import random
 
 def hough_transform(image, threshold, rho_resolution, theta_resolution):
     # Get image dimensions
@@ -117,9 +118,40 @@ for line in merged_lines:
     x1, y1 = line #x2,y2 pani thiyo
     print(f"Line: ({x1}, {y1}))") #-{x2},{y2} thiyo
 
+# Find the line intersection points
+intersection_points = []
+for i in range(len(lines)):
+    for j in range(i + 1, len(lines)):
+        rho1, theta1 = lines[i]
+        rho2, theta2 = lines[j]
+
+        # Convert to Cartesian coordinates
+        a1 = np.cos(theta1)
+        b1 = np.sin(theta1)
+        c1 = -rho1
+        a2 = np.cos(theta2)
+        b2 = np.sin(theta2)
+        c2 = -rho2
+
+        # Calculate the intersection point
+        d = a1 * b2 - a2 * b1
+        if d != 0:
+            x = (b1 * c2 - b2 * c1) / d
+            y = (a2 * c1 - a1 * c2) / d
+            intersection_points.append((x, y))
+
+
+
+
 
 # Draw the detected lines on the original image
 result = draw_lines(cv2.cvtColor(image, cv2.COLOR_GRAY2BGR), lines)
+
+# Draw the intersection points
+for x, y in intersection_points:
+    cv2.circle(result, (int(x), int(y)), 5, (random.randint(0,255), random.randint(0,255), random.randint(0,255)), random.randint(1,10))
+
+
 
 # Display the result
 cv2.imshow('Lines Detected', result)
