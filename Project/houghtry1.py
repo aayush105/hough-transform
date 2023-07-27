@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import math
 import random
+from sklearn.cluster import KMeans
 
 def hough_transform(image, threshold, rho_resolution, theta_resolution):
     # Get image dimensions
@@ -58,6 +59,7 @@ def draw_lines(image, lines):
         cv2.line(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
     return image
+
 
 #yo probability ko laagi try
 
@@ -140,7 +142,25 @@ for i in range(len(lines)):
             y = (a2 * c1 - a1 * c2) / d
             intersection_points.append((x, y))
 
+# Extract points from lines for clustering
+line_points = np.array([(rho * np.cos(theta),rho*np.sin(theta)) for rho, theta in lines])
 
+# perfrom k-mean clustering to spearate lines
+kmeans = KMeans(n_clusters = 2, random_state = 0, n_init="auto").fit(line_points)
+cluster_centers = kmeans.cluster_centers_
+
+
+
+# Create a copy of the original image to draw the lines and intersection points on it
+result = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+
+# draw the lines detected bye k-means clustering
+for center in cluster_centers:
+    rhos, thetas = cv2.cartToPolar(center[0], center[1])
+    for rho, theta1 in zip(rhos, thetas):
+        rho = int(rho)
+        theta_degrees = int(np.degrees(theta1))
+        cv2.line(result, (0,rho), (image.shape[1], rho),(0,0,255),2)
 
 
 
@@ -151,7 +171,16 @@ result = draw_lines(cv2.cvtColor(image, cv2.COLOR_GRAY2BGR), lines)
 for x, y in intersection_points:
     cv2.circle(result, (int(x), int(y)), 5, (random.randint(0,255), random.randint(0,255), random.randint(0,255)), random.randint(1,10))
 
+# perform k-means clustering to groupd intersection points
+intersection_points_array = np.array(intersection_points)
+kmeans = k=KMeans(n_clusters=4, random_state= 0).fit(intersection_points_array)
+intersection_centers = kmeans.cluster_centers_
 
+
+# draw the intersection points detected by k-means clustering
+for center in intersection_centers:
+    x, y = center
+    cv2.circle(result, (int(x), int(y)), 5, (255,0,0), -1)
 
 # Display the result
 cv2.imshow('Lines Detected', result)
