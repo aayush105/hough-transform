@@ -60,7 +60,6 @@ def draw_lines(image, lines):
 
     return image
 
-
 #yo probability ko laagi try
 
 def hough_lines_p(coordinates, min_line_length, max_line_gap):
@@ -96,7 +95,7 @@ def hough_lines_p(coordinates, min_line_length, max_line_gap):
 
 
 # Load the input image
-image = cv2.imread('circuitimg.jpg', 0)  # Read the image as grayscale
+image = cv2.imread('ckt4.jpg', 0)  # Read the image as grayscale
 
 # Apply Canny edge detection
 edges = cv2.Canny(image, 50, 150, apertureSize=3)
@@ -104,7 +103,7 @@ edges = cv2.Canny(image, 50, 150, apertureSize=3)
 # Perform Hough Transform
 threshold = 100  # Minimum number of votes to consider a line
 rho_resolution = 1
-theta_resolution = 180  # 180 degrees (pi radians)
+theta_resolution = 90  # 90 degrees (pi radians)
 lines = hough_transform(edges, threshold, rho_resolution, theta_resolution)
 
 #probability ko laagi try
@@ -117,8 +116,8 @@ merged_lines = hough_lines_p(lines, min_line_length, max_line_gap)
 
 # Print the merged lines
 for line in merged_lines:
-    x1, y1 = line #x2,y2 pani thiyo
-    print(f"Line: ({x1}, {y1}))") #-{x2},{y2} thiyo
+    x1, y1 = line 
+    print(f"Line: ({x1}, {y1}))") 
 
 # Find the line intersection points
 intersection_points = []
@@ -135,7 +134,7 @@ for i in range(len(lines)):
         b2 = np.sin(theta2)
         c2 = -rho2
 
-        # Calculate the intersection point
+        # Calculate the intersection point 
         d = a1 * b2 - a2 * b1
         if d != 0:
             x = (b1 * c2 - b2 * c1) / d
@@ -145,13 +144,17 @@ for i in range(len(lines)):
 # Extract points from lines for clustering
 line_points = np.array([(rho * np.cos(theta),rho*np.sin(theta)) for rho, theta in lines])
 
-# perfrom k-mean clustering to spearate lines
-kmeans = KMeans(n_clusters = 2, random_state = 0, n_init="auto").fit(line_points)
+# Calculate the number of clusters based on the number of intersection points
+n_clusters = min(len(intersection_points), len(line_points))
+
+# Perform k-means clustering to separate lines
+kmeans = KMeans(n_clusters=n_clusters, random_state=0, n_init="auto").fit(line_points)
 cluster_centers = kmeans.cluster_centers_
 
+# # perfrom k-mean clustering to spearate lines
+# kmeans = KMeans(n_clusters = 4, random_state = 0, n_init="auto").fit(line_points)
+# cluster_centers = kmeans.cluster_centers_
 
-
-# Create a copy of the original image to draw the lines and intersection points on it
 result = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
 
 # draw the lines detected bye k-means clustering
@@ -181,8 +184,10 @@ intersection_centers = kmeans.cluster_centers_
 for center in intersection_centers:
     x, y = center
     cv2.circle(result, (int(x), int(y)), 5, (255,0,0), -1)
+    print(f"Node coordinates: ({x}, {y})")
 
 # Display the result
 cv2.imshow('Lines Detected', result)
+
 cv2.waitKey(0)
 cv2.destroyAllWindows()
