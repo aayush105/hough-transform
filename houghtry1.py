@@ -95,7 +95,7 @@ def hough_lines_p(coordinates, min_line_length, max_line_gap):
 
 
 # Load the input image
-image = cv2.imread('ckt4.jpg', 0)  # Read the image as grayscale
+image = cv2.imread('Project/hand.png', 0)  # Read the image as grayscale
 
 # Apply Canny edge detection
 edges = cv2.Canny(image, 50, 150, apertureSize=3)

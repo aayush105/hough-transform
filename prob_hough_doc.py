@@ -19,7 +19,7 @@ def detect_nodes(lines):
     return np.array(intersections) if intersections else None
 
 def find_significant_nodes(nodes):
-    clustering = DBSCAN(eps=15, min_samples=3).fit(nodes)
+    clustering = DBSCAN(eps=10, min_samples=2).fit(nodes)
     labels = clustering.labels_
     unique_labels = set(labels)
     
@@ -33,7 +33,7 @@ def find_significant_nodes(nodes):
     return significant_nodes
 
 def main(argv):
-    default_file = "Project/ckt4.jpg"
+    default_file = "Project/ckt5.jpeg"
     filename = argv[0] if len(argv) > 0 else default_file
 
     # Loads an image
